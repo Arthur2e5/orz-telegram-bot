@@ -16,7 +16,8 @@ var client = new IRC.Client(config.irc_server, config.irc_nick, {
     username: config.irc_username,
     password: config.irc_password,
     floodProtection: true,
-    floodProtectionDelay: 1000
+    floodProtectionDelay: 1000,
+    ircBlock: (typeof config.irc_blocklist !== "undefined" && config.irc_blocklist !== null) ? config.irc_blocklist : ['']
 });
 var tgid, tgusername;
 var enabled = true;
@@ -29,7 +30,7 @@ function printf(args) {
     /* note that %n in the string must be in ascending order */
     /* like 'Foo %1 Bar %2 %3' */
     var i;
-    for(i=arguments.length-1; i>0; i--)
+    for (i=arguments.length-1; i>0; i--)
         string = string.replace('%'+i, arguments[i]);
     return string;
 }
@@ -39,16 +40,16 @@ function format_name(first_name, last_name) {
     var full_name = last_name?
         first_name + ' ' + last_name:
         first_name;
-    if(full_name.length > 20)
+    if (full_name.length > 20)
         full_name = full_name.slice(0, 20);
     return full_name;
 }
 
 
 function format_newline(text, user, target, type) {
-    if(type == 'reply')
+    if (type == 'reply')
         return text.replace(/\n/g, printf('\n[%1] %2: ', user, target));
-    if(type == 'forward')
+    if (type == 'forward')
         return text.replace(/\n/g, printf('\n[%1] Fwd %2: ', user, target));
     return text.replace(/\n/g, printf("\n[%1] ", user));
 }
@@ -70,7 +71,7 @@ client.addListener('message' + config.irc_channel, function (from, message) {
     if (blocki2t.indexOf(from) > -1 || !enabled)
         return;
 
-    if(config.other_bridge_bots.indexOf(from) == -1)
+    if (config.other_bridge_bots.indexOf(from) == -1)
         message = printf('[%1] %2', from, message);
     tg.sendMessage({
         text: message,
@@ -86,7 +87,7 @@ client.addListener('action', function (from, to, text) {
     if (blocki2t.indexOf(from) > -1 || !enabled)
         return;
 
-    if(to == config.irc_channel){
+    if (to == config.irc_channel){
         if(config.other_bridge_bots.indexOf(from) == -1)
             text = printf('** [%1] %2 **', from, text);
         else
