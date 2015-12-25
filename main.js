@@ -22,6 +22,7 @@ var tgid, tgusername;
 var enabled = true;
 var blocki2t = new Array();
 var blockt2i = new Array();
+var msgfilter = function (s) { return s; };
 
 
 function printf(args) {
@@ -226,7 +227,7 @@ tg.on('message', function(msg) {
         message_text = format_newline(msg.text, user);
         message_text = printf('[%1] %2', user, message_text);
     }
-    client.say(config.irc_channel, message_text);
+    client.say(config.irc_channel, msgfilter(message_text));
     //End of the sub process.
 });
 
@@ -238,6 +239,11 @@ client.addListener('error', function(message) {
 // Load blocklist
 blocki2t = config.blocki2t;
 blockt2i = config.blockt2i;
+
+// init message filter
+if (typeof (config.tg_msg_filter) === 'function') {
+    msgfilter = config.tg_msg_filter;
+}
 
 tg.start();
 tg.getMe().then(function(ret){
